@@ -47,7 +47,6 @@ import pandas as pd
 import progressbar
 import os
 import random
-
 import requests
 
 # SQL Alchemy
@@ -55,21 +54,21 @@ engine = db.create_engine('sqlite:///institutional_quarterly_report_metadata.sql
 connection = engine.connect()
 metadata = db.MetaData()
 
-report_table = db.Table('tb_ihe_status', metadata,
-                        db.Column('ID', db.String(64), primary_key=True),
-                        db.Column('OPE_ID', db.String(20)),
-                        db.Column('Applicant_Name', db.String(250)),
-                        db.Column('Applicant_State', db.String(5)),
-                        db.Column('School_Domain', db.String(250)),
-                        db.Column('Query', db.String(100)),
-                        db.Column('Google_Queried', db.Boolean),
-                        db.Column('Num_Search_Results', db.Integer),
-                        db.Column('Files_Downloaded', db.Boolean),
-                        db.Column('Num_Files_Downloaded', db.Integer),
-                        db.Column('PDF_URL', db.String(150)),
-                        db.Column('Size', db.Float),
-                        db.Column('File_Name', db.String(200))
-                        )
+# report_table = db.Table('tb_ihe_status', metadata,
+#                         db.Column('ID', db.String(64), primary_key=True),
+#                         db.Column('OPE_ID', db.String(20)),
+#                         db.Column('Applicant_Name', db.String(250)),
+#                         db.Column('Applicant_State', db.String(5)),
+#                         db.Column('School_Domain', db.String(250)),
+#                         db.Column('Query', db.String(100)),
+#                         db.Column('Google_Queried', db.Boolean),
+#                         db.Column('Num_Search_Results', db.Integer),
+#                         db.Column('Files_Downloaded', db.Boolean),
+#                         db.Column('Num_Files_Downloaded', db.Integer),
+#                         db.Column('PDF_URL', db.String(150)),
+#                         db.Column('Size', db.Float),
+#                         db.Column('File_Name', db.String(200))
+#                         )
 
 google_search_table = db.Table('google_search_tracking', metadata,
                         db.Column('ID', db.String(64), primary_key=True),
@@ -118,13 +117,13 @@ def google_search(siteStr):
     query = "\"Institutional Portion\" HEERF filetype:pdf site:" + siteStr
     df['Google Queried'] = 'Y'
     # for j in search(query, tld="co.in", num=10, stop = None, pause = 4):
-    for j in search(query, num_results=10, lang="en"):
+    for j in search(query = query, num = 10, start = 0, pause = 40):
         results.append(j)
 
     return results
 
 
-for applicant_no in tqdm(range(63, len(df_filtered['Applicant Name'])), desc="Google Search status"):
+for applicant_no in tqdm(range(146, len(df_filtered['Applicant Name'])), desc="Google Search status"):
     google_query = "\"Institutional Portion\" HEERF filetype:pdf site:" + df_filtered['Site'][applicant_no]
 
     search_results = google_search(df_filtered['Site'][applicant_no])
@@ -169,11 +168,10 @@ for applicant_no in tqdm(range(63, len(df_filtered['Applicant Name'])), desc="Go
             r = requests.get(pdf_url, headers=headers)
             with open(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no], pdf_title), 'wb') as f:
                 f.write(r.content)
-            # wget.download(book_download_url, os.path.join("F:", "Karthik", "All_IT_Ebooks", book_save_title))
         except:
             print("Error occured at school: {}, on pdf :{},  pdf_url :{}".format(df_filtered['Applicant Name'][applicant_no],
                                                                                                   pdf_title,
                                                                                                   pdf_url))
             continue
 
-    time.sleep(40 + random.randrange(1, 10)/10)
+    #time.sleep(40 + random.randrange(1, 10)/10)
