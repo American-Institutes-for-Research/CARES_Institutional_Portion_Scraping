@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Page Not Found | New Tyler Barber College, Inc.</title>
+<meta name="copyright" content="Copyright 2021 New Tyler Barber College, Inc.">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="/inc/templates/current/newtylerbarbercollege/css/master.css?v=1.4" rel="stylesheet" type="text/css">
+<script src="/inc/templates/current/newtylerbarbercollege/extra/jquery-1.11.1.min.js"></script>
+<script src="/inc/templates/current/newtylerbarbercollege/extra/jquery.cycle2.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800,600' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div id="container">
+		<div id="header">
+		<div id="logo"><a href="/"><img src="/inc/templates/current/newtylerbarbercollege/images/logo.png" alt="New Tyler Barber College, Inc." width="970" height="57"></a></div>
+		<div id="social_icons"><a href="https://twitter.com/NTBC79" target="_blank"><img src="/inc/templates/current/newtylerbarbercollege/images/icon-twitter.png" alt="Twitter" width="31" height="31"></a><a href="https://www.facebook.com/newtyler.barbercollege" target="_blank"><img src="/inc/templates/current/newtylerbarbercollege/images/icon-facebook.png" alt="Facebook" width="31" height="31"></a><a href="https://instagram.com/newtyler/" target="_blank"><img src="/inc/templates/current/newtylerbarbercollege/images/icon-instagram.png" alt="Instagram" width="31" height="31"></a><a href="https://www.pinterest.com/newtylerbarberc/" target="_blank"><img src="/inc/templates/current/newtylerbarbercollege/images/icon-pinterest.png" alt="Pinterest" width="31" height="31"></a></div>
+				<!-- navigation -->
+		<div id="navigation">
+			<!-- shell -->
+			<div class="shell">
+				<ul class="main">
+																<li><a href="/" class="nav_link">Home</a>																					<li><a href="/about/" class="nav_link">About</a>																																																																																																															<li><a href="/prospective-students/" class="nav_link">Prospective Students</a>															<div class="dd">
+				    	<ul>			    		
+				    						    									<li>
+							<a href="/prospective-students/checklist/" class="nav_active">Checklist</a></li>
+																		    									<li>
+							<a href="/prospective-students/financial-aid/" class="nav_active">Financial Aid</a></li>
+																		    									<li>
+							<a href="/prospective-students/important-school-disclosures/" class="nav_active">Important School Disclosures</a></li>
+																		    									<li>
+							<a href="/prospective-students/net-price-calculator/" class="nav_active">Net Price Calculator</a></li>
+																		    									<li>
+							<a href="/prospective-students/barber-stylist/" class="nav_active">Barber Stylist</a></li>
+																		    									<li class="last">
+							<a href="/prospective-students/instructor/" class="nav_active last">Instructor</a></li>
+																		    	</ul>
+				    </div>
+					</li>
+																					<li><a href="/services/" class="nav_link">Services</a>																					<li><a href="/gallery/" class="nav_link">Gallery</a>																																				<li><a href="#" class="nav_link nolink">COVID-19</a>															<div class="dd">
+				    	<ul>			    		
+				    						    									<li>
+							<a href="/covid-19/cares-act-relief-grant/" class="nav_active">Cares Act Relief Grant (Student)</a></li>
+																		    									<li class="last">
+							<a href="/covid-19/cares-act-relief-grant-institutional/" class="nav_active last">Cares Act Relief Grant (Institutional)</a></li>
+																		    	</ul>
+				    </div>
+					</li>
+																					<li><a href="/contact-us/" class="nav_link">Contact Us</a>																													</ul>
+			</div>
+			<!-- end shell -->
+					</div>
+		<!-- end navigation -->
+	</div>
+	<div id="sub_header">
+		<a href="/prospective-students/"><div id="sub_header_1">APPLY NOW<div class="sub_header_desc">START A NEW CAREER</div></div></a>
+		<a href="/services/"><div id="sub_header_2">SALON<div class="sub_header_desc">SALON SERVICES</div></div></a>
+		<a href="/contact-us/"><div id="sub_header_3">CONTACT US<div class="sub_header_desc">DIRECTIONS &bull; LOCATION</div></div></a>
+	</div>
+<div id="content_container">
+	<div id="content"><p>Sorry, the page you're looking for can't be found.</p>		</div>
+		<div style="clear:both"></div>
+</div>
+	<div id="footer">
+		<div id="nav_footer"><a href="/" class="">Home</a><a href="/about/" class="">About</a><a href="/prospective-students/" class="">Prospective Students</a><a href="/services/" class="">Services</a><a href="/gallery/" class="">Gallery</a><a href="/covid-19/" class="">COVID-19</a><a href="/contact-us/" class="">Contact Us</a></div>
+		<div id="footer_social_icons"><a href="https://twitter.com/NTBC79" target="_blank"><img src="/inc/templates/current/newtylerbarbercollege/images/icon-footer-twitter.gif" alt="Twitter" width="31" height="31"></a><a href="https://www.facebook.com/newtyler.barbercollege" target="_blank"><img src="/inc/templates/current/newtylerbarbercollege/images/icon-footer-facebook.gif" alt="Facebook" width="31" height="31"></a><a href="https://instagram.com/newtyler/" target="_blank"><img src="/inc/templates/current/newtylerbarbercollege/images/icon-footer-instagram.gif" alt="Instagram" width="31" height="31"></a><a href="https://www.pinterest.com/newtylerbarberc/" target="_blank"><img src="/inc/templates/current/newtylerbarbercollege/images/icon-footer-pinterest.gif" alt="Pinterest" width="31" height="31"></a></div>
+		<div id="copyright">Copyright 2021 New Tyler Barber College, Inc. All rights reserved. | <a href="http://www.venuecom.com" title="Website Management" target="_blank">Website Management by Venue Communications, Inc.</a></div>
+	</div>
+</div>
+</body>
+</html>
