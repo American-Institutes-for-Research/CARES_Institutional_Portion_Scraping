@@ -20,6 +20,7 @@
     [1] 
    +===============+==========-==========*==========-==========+===============+
 """
+#%%
 
 from bs4 import BeautifulSoup
 import os
@@ -48,7 +49,9 @@ import progressbar
 import os
 import random
 import requests
+import re
 
+#%%
 # SQL Alchemy
 engine = db.create_engine('sqlite:///institutional_quarterly_report_metadata.sqlite')
 connection = engine.connect()
@@ -88,6 +91,7 @@ google_search_table = db.Table('google_search_tracking', metadata,
 
 metadata.create_all(engine)
 
+#%%
 # Import list of schools
 # columnNames = ['School Name', 'Status','Number Active URL', 'Number PDFs', 'Site', 'Google Queried', 'Google Reports Found', 'Reports Downloaded']
 data = pd.read_csv('./all 5000 statuses.csv')  # , names=columnNames)
@@ -109,21 +113,24 @@ df['shortURL'] = df.URL.str.split("/", expand=True)[2]
 df['Site'] = [str(x).replace('www.', '') for x in df['shortURL']]
 
 # df = df.set_index('index')
-df_filtered = df[["Applicant Name", "Applicant State", "OPE ID", "Site"]]
-
-
+#df_filtered = df[["Applicant Name", "Applicant State", "OPE ID", "Site"]]
+df_filtered = df.loc[:,['Applicant Name','Applicant State', 'OPE ID', 'Site']]
+df_filtered['Applicant Name'] = df_filtered['Applicant Name'].apply(lambda x: re.sub('[^A-Za-z0-9 ]+','_',x))
+df_filtered['Applicant Name'] = df_filtered['Applicant Name'].apply(lambda x: re.sub(' ','_',x))
+                                                                     
+#%%
 def google_search(siteStr):
     results = []
     query = "\"Institutional Portion\" HEERF filetype:pdf site:" + siteStr
     df['Google Queried'] = 'Y'
     # for j in search(query, tld="co.in", num=10, stop = None, pause = 4):
-    for j in search(query = query, num = 10, start = 0, pause = 40):
+    for j in search(query = query, num = 10, start = 0, pause = 10):
         results.append(j)
 
     return results
 
-
-for applicant_no in tqdm(range(146, len(df_filtered['Applicant Name'])), desc="Google Search status"):
+#%%
+for applicant_no in tqdm(range(3000, len(df_filtered['Applicant Name'])), desc="Google Search status"):
     google_query = "\"Institutional Portion\" HEERF filetype:pdf site:" + df_filtered['Site'][applicant_no]
 
     search_results = google_search(df_filtered['Site'][applicant_no])
@@ -175,3 +182,5 @@ for applicant_no in tqdm(range(146, len(df_filtered['Applicant Name'])), desc="G
             continue
 
     #time.sleep(40 + random.randrange(1, 10)/10)
+    
+temp = pd.read_sql("SELECT * from google_search_tracking", con = engine)
