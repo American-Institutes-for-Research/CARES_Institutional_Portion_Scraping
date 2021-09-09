@@ -23,19 +23,29 @@
 
 from tika import parser
 import os
-
+import re
+from urllib.request import url2pathname
 root_dir = '.'
-draft_dir = os.path.join(root_dir, 'test_files')
+downloaded_files_dir = os.path.join(root_dir, 'Downloaded_PDFs')
+target_dir = os.path.join(root_dir, 'text_versions')
 
-draft_files = [file for file in os.listdir(draft_dir) if not file.startswith('~')]
-
-for draft_file in draft_files:
-    # Parse data from file
-    file_data = parser.from_file(os.path.join(draft_dir, draft_file))
-    # Get files text content
-    text = file_data['content']
-    cleaned_text = str(text).strip()
+for folder in os.listdir(downloaded_files_dir):
+    if folder.startswith('.'):
+        print("Skipping folder {}".format(folder))
+        continue
+    os.makedirs(os.path.join(target_dir, re.sub('[^a-zA-Z0-9 \n\.]', '', folder)), exist_ok=True)
+    for file in os.listdir(os.path.join(downloaded_files_dir, folder)):
+        if file.startswith('~'):
+            print("Skipping file {}".format(file))
+            continue
+        else:
+            file_data = parser.from_file(os.path.join(downloaded_files_dir, folder, file))
+            # Get files text content
+            text = file_data['content']
+            cleaned_text = str(text).strip()
     
-    # Save converted files
-    with open(os.path.join(root_dir, 'text_versions', "{}.txt".format(draft_file.split('.')[0])), "w") as text_file:
-        text_file.write(cleaned_text)
+            # Save converted files
+            with open(os.path.join(target_dir, re.sub('[^a-zA-Z0-9 \n\.]', '', folder), "{}.txt".format(re.sub('[^a-zA-Z0-9 \n\.]', '', file.split('.')[0]))), "w") as text_file:
+                text_file.write(cleaned_text)
+
+            
