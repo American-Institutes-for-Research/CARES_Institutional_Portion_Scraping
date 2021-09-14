@@ -182,26 +182,28 @@ d = {
 root_dir = '.'
 text_files_dir = os.path.join(root_dir, 'text_versions')
 
-df = pd.DataFrame(columns=list(d),dtype='string',index=range(0,len(os.listdir(text_files_dir))))
+df = pd.DataFrame(columns=list(d.values()),dtype='string')
+
+# #%%
+
+# def extractLines(txtfile):    
+#     #lines_to_read = range(163,232)
+#     fp = open(txtfile, 'r', encoding='UTF-8')
+#     lines = fp.readlines()
+# #    idx_list = []
+#     for item in lines:
+#         if ("Institution Name:" in item):
+#             start_idx = lines.index(item)
+#     for item in lines:
+#         if (lines.index(item) >= start_idx):
+#             idx = lines.index(item)
+#             df2.loc[idx,'line']=item
+#             df2.loc[idx,'line2']=item.strip()
+#     fp.close()
 
 #%%
+new_dict = {}
 
-def extractLines(txtfile):    
-    #lines_to_read = range(163,232)
-    fp = open(txtfile, 'r', encoding='UTF-8')
-    lines = fp.readlines()
-#    idx_list = []
-    for item in lines:
-        if ("Institution Name:" in item):
-            start_idx = lines.index(item)
-    for item in lines:
-        if (lines.index(item) >= start_idx):
-            idx = lines.index(item)
-            df2.loc[idx,'line']=item
-            df2.loc[idx,'line2']=item.strip()
-    fp.close()
-
-#%%
 for folder in os.listdir(text_files_dir):
     print("Working in folder {}".format(folder))
     if folder.startswith('.'):
@@ -209,20 +211,19 @@ for folder in os.listdir(text_files_dir):
         continue
     for file in os.listdir(os.path.join(text_files_dir,folder)):
         filename = "{}".format(file)
-        print("Working with "+ filename)
+        new_dict = {}
         file_path = os.path.join(os.path.join(text_files_dir,folder),filename)
         fp = open(file_path, 'r', encoding='UTF-8')
         lines = fp.readlines()
         for item in lines:
             if ((not (u"\u00A0" in item)) & (":" in item) & (not("http" in item))):
-                if item == '':
-                    print("item is empty")
-                else:
-                    print("Working with item "+ item)
+                # if item == '':
+                #     print("item is empty")
+                # else:
+                #     print("Working with item "+ item)
                 splitList = item.split(':')
                 ans = splitList[-1].strip()
                 question = item.replace(ans,'')
-                for key, value in d.items():
-                    if key in lines:
-                        df.loc[df.column == key, =ans
-        fp.close()
+                if question in d.keys():
+                   new_dict[d[question]] = ans
+    print(new_dict)
