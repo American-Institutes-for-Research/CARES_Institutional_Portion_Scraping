@@ -120,7 +120,7 @@ d = {
     'Explanatory NotesProviding tuition discounts':'R3C4',
     'Amount in a1 institutional dollarsCovering the cost of providing additional technology hardware to students such as laptops or tablets or covering the added cost of technology fees':'R4C1',
     'Amount in a2 dollars if applicableCovering the cost of providing additional technology hardware to students such as laptops or tablets or covering the added cost of technology fees':'R4C2',
-    'Amount in a3 dollars if applicableCovering the cost of providing additional technology hardware to students such as laptops or tablets or covering the added cost of technology fee':'R4C3',
+    'Amount in a3 dollars if applicableCovering the cost of providing additional technology hardware to students such as laptops or tablets or covering the added cost of technology fees':'R4C3',
     'Explanatory NotesCovering the cost of providing additional technology hardware to students such as laptops or tablets or covering the added cost of technology fees':'R4C4',
     'Amount in a1 institutional dollarsProviding or subsidizing the costs of highspeed internet to students or faculty to transition to an online environment':'R5C1',
     'Amount in a2 dollars if applicableProviding or subsidizing the costs of highspeed internet to students or faculty to transition to an online environment':'R5C2',
@@ -180,49 +180,75 @@ d = {
     }
 
 root_dir = '.'
-text_files_dir = os.path.join(root_dir, 'text_versions')
+text_files_dir = os.path.join(root_dir, 'text_versions', 'text_versions')
 
-df = pd.DataFrame(columns=list(d),dtype='string',index=range(0,len(os.listdir(text_files_dir))))
-
-#%%
-
-def extractLines(txtfile):    
-    #lines_to_read = range(163,232)
-    fp = open(txtfile, 'r', encoding='UTF-8')
-    lines = fp.readlines()
-#    idx_list = []
-    for item in lines:
-        if ("Institution Name:" in item):
-            start_idx = lines.index(item)
-    for item in lines:
-        if (lines.index(item) >= start_idx):
-            idx = lines.index(item)
-            df2.loc[idx,'line']=item
-            df2.loc[idx,'line2']=item.strip()
-    fp.close()
+df = pd.DataFrame(columns=list(d.values()),dtype='string')
 
 #%%
+
+# def extractLines(txtfile):    
+#     #lines_to_read = range(163,232)
+#     fp = open(txtfile, 'r', encoding='UTF-8')
+#     lines = fp.readlines()
+# #    idx_list = []
+#     for item in lines:
+#         if ("Institution Name:" in item):
+#             start_idx = lines.index(item)
+#     for item in lines:
+#         if (lines.index(item) >= start_idx):
+#             idx = lines.index(item)
+#             df2.loc[idx,'line']=item
+#             df2.loc[idx,'line2']=item.strip()
+#     fp.close()
+
+#%%
+#initialize empty list and dictionary
+row_list = []
+row_dict = {}
+
 for folder in os.listdir(text_files_dir):
     print("Working in folder {}".format(folder))
     if folder.startswith('.'):
         print("Skipping folder {}".format(folder))
         continue
+    #loop through each file in the folder
     for file in os.listdir(os.path.join(text_files_dir,folder)):
+        #reset dictionary
+        row_dict = {}
         filename = "{}".format(file)
         print("Working with "+ filename)
-        file_path = os.path.join(os.path.join(text_files_dir,folder),filename)
-        fp = open(file_path, 'r', encoding='UTF-8')
+        file_path = os.path.join(text_files_dir,folder,filename)
+        try:
+            fp = open(file_path, 'r', encoding='UTF-8')
+        except FileNotFoundError:
+            print("Error: " + folder + "/" + filename)
+            continue
         lines = fp.readlines()
+        
+        #process each line
         for item in lines:
+            #only look at lines with a tab and a colon, and without http
             if ((not (u"\u00A0" in item)) & (":" in item) & (not("http" in item))):
-                if item == '':
-                    print("item is empty")
-                else:
-                    print("Working with item "+ item)
+                # if item == '':
+                #     print("item is empty")
+                # else:
+                #     print("Working with item "+ item)
+
+                #split item on the colon
                 splitList = item.split(':')
                 ans = splitList[-1].strip()
                 question = item.replace(ans,'')
-                for key, value in d.items():
-                    if key in lines:
-                        df.loc[df.column == key, =ans
+                question = question.replace(":", '').strip()
+                #build a dictionary of relevant items
+                if question in d.keys():
+                    row_dict[d[question]] = ans
+        
+        #add dictionary to the list if it has any content
+        if len(row_dict) > 0:
+            row_dict['filename']=filename
+            row_dict['folder'] = str(folder)
+            row_list.append(row_dict)
         fp.close()
+
+#compile into one dataframe
+parsed_df = pd.DataFrame.from_dict(row_list)
