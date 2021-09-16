@@ -57,22 +57,6 @@ engine = db.create_engine('sqlite:///institutional_quarterly_report_metadata.sql
 connection = engine.connect()
 metadata = db.MetaData()
 
-# report_table = db.Table('tb_ihe_status', metadata,
-#                         db.Column('ID', db.String(64), primary_key=True),
-#                         db.Column('OPE_ID', db.String(20)),
-#                         db.Column('Applicant_Name', db.String(250)),
-#                         db.Column('Applicant_State', db.String(5)),
-#                         db.Column('School_Domain', db.String(250)),
-#                         db.Column('Query', db.String(100)),
-#                         db.Column('Google_Queried', db.Boolean),
-#                         db.Column('Num_Search_Results', db.Integer),
-#                         db.Column('Files_Downloaded', db.Boolean),
-#                         db.Column('Num_Files_Downloaded', db.Integer),
-#                         db.Column('PDF_URL', db.String(150)),
-#                         db.Column('Size', db.Float),
-#                         db.Column('File_Name', db.String(200))
-#                         )
-
 google_search_table = db.Table('google_search_tracking', metadata,
                         db.Column('ID', db.String(64), primary_key=True),
                         db.Column('OPE_ID', db.String(20)),
@@ -80,43 +64,33 @@ google_search_table = db.Table('google_search_tracking', metadata,
                         db.Column('Applicant_State', db.String(5)),
                         db.Column('Applicant_Domain', db.String(250)),
                         db.Column('Query', db.String(100)),
-                        db.Column('Google_Queried', db.Boolean),
                         db.Column('Num_Search_Results', db.Integer),
-                        db.Column('PDF_URL', db.String(150))#,
-                        #db.Column('Files_Downloaded', db.Boolean),
-                        #db.Column('Num_Files_Downloaded', db.Integer),
-                        #db.Column('Size', db.Float),
-                        #db.Column('File_Name', db.String(200))
+                        db.Column('PDF_URL', db.String(150))
                         )
 
 metadata.create_all(engine)
 
 #%%
 # Import list of schools
-# columnNames = ['School Name', 'Status','Number Active URL', 'Number PDFs', 'Site', 'Google Queried', 'Google Reports Found', 'Reports Downloaded']
-data = pd.read_csv('./all 5000 statuses.csv')  # , names=columnNames)
-# print(df)
-df = data[['school_name']]
+school_status_data = pd.read_csv('./all 5000 statuses.csv', usecols=['school_name'])  # , names=columnNames)
 
 # Extract general school website from URL file and add to data frame
 # Read in provided URLS
-file = pd.read_excel('./IHE Student URLS January.xlsm')
+url_data = pd.read_excel('./IHE Student URLS January.xlsm')
 # raw_url = file['URL']
-df = df.join(file)
+df = school_status_data.join(url_data)
 
 # Extract primary component of URL
-# urldf = pd.DataFrame(file['URL']) #, dtype="string")
-# df['rawURL'] = raw_url
 df['shortURL'] = df.URL.str.split("/", expand=True)[2]
 
 # Remove preceding "www." if present
 df['Site'] = [str(x).replace('www.', '') for x in df['shortURL']]
 
-# df = df.set_index('index')
-#df_filtered = df[["Applicant Name", "Applicant State", "OPE ID", "Site"]]
 df_filtered = df.loc[:,['Applicant Name','Applicant State', 'OPE ID', 'Site']]
-df_filtered['Applicant Name'] = df_filtered['Applicant Name'].apply(lambda x: re.sub('[^A-Za-z0-9 ]+','_',x))
-df_filtered['Applicant Name'] = df_filtered['Applicant Name'].apply(lambda x: re.sub(' ','_',x))
+
+
+df_filtered['Applicant Name'] = df_filtered['Applicant Name'].apply(lambda x: re.sub('[^a-zA-Z0-9 \n\.]','',x))
+
                                                                      
 #%%
 def google_search(siteStr):
@@ -141,7 +115,6 @@ for applicant_no in tqdm(range(3000, len(df_filtered['Applicant Name'])), desc="
                        'Applicant_State': df_filtered['Applicant State'][applicant_no],
                        'Applicant_Domain': df_filtered['Site'][applicant_no],
                        'Query': google_query,
-                       'Google_Queried': True,
                        'Num_Search_Results': num_search_results,
                        'PDF_URL': pdf_url}]
     
@@ -161,7 +134,8 @@ for applicant_no in tqdm(range(3000, len(df_filtered['Applicant Name'])), desc="
         query = db.insert(google_search_table)
         ResultProxy = connection.execute(query, value_list)
 
-        pdf_title = pdf_url.split('/')[-1]
+        pdf_title = re.sub('[^a-zA-Z0-9 \n\.]', '_', pdf_url.split('/')[-1])
+        
         
         if pdf_title in os.listdir(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no])):
             print("PDF already downloaded, Skipping : {}".format(pdf_title))
@@ -180,7 +154,5 @@ for applicant_no in tqdm(range(3000, len(df_filtered['Applicant Name'])), desc="
                                                                                                   pdf_title,
                                                                                                   pdf_url))
             continue
-
-    #time.sleep(40 + random.randrange(1, 10)/10)
     
-temp = pd.read_sql("SELECT * from google_search_tracking", con = engine)
+#temp = pd.read_sql("SELECT * from google_search_tracking", con = engine)

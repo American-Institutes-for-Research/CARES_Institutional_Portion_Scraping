@@ -33,7 +33,7 @@ for folder in os.listdir(downloaded_files_dir):
     if folder.startswith('.'):
         print("Skipping folder {}".format(folder))
         continue
-    os.makedirs(os.path.join(target_dir, re.sub('[^a-zA-Z0-9 \n\.]', '', folder)), exist_ok=True)
+    os.makedirs(os.path.join(target_dir, re.sub('[^a-zA-Z0-9 \n\.]', '_', folder)), exist_ok=True)
     for file in os.listdir(os.path.join(downloaded_files_dir, folder)):
         if file.startswith('~'):
             print("Skipping file {}".format(file))
@@ -45,7 +45,7 @@ for folder in os.listdir(downloaded_files_dir):
             cleaned_text = str(text).strip()
     
             # Save converted files
-            with open(os.path.join(target_dir, re.sub('[^a-zA-Z0-9 \n\.]', '', folder), "{}.txt".format(re.sub('[^a-zA-Z0-9 \n\.]', '', file.split('.')[0]))), "w") as text_file:
+            with open(os.path.join(target_dir, re.sub('[^a-zA-Z0-9 \n\.]', '_', folder), "{}.txt".format(re.sub('[^a-zA-Z0-9 \n\.]', '_', file.split('.')[0]))), "w") as text_file:
                 text_file.write(cleaned_text)
 
             
