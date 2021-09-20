@@ -17,88 +17,93 @@
    +===============+==========-==========*==========-==========+===============+
                                    CHANGE LOGS
                           DATA || CHANGE || SECTION || USER
-    [1] (8/30/2021) Initial construction of script by A. Miller
+    [1] Initial construction of script || Abby Miller
+    [2] Updated with comments || Abby Miller
    +===============+==========-==========*==========-==========+===============+
 """
 
 #%%
 
-""" Set up """
+""" This section contains code that we used for testing and is not necessary for running the script successfully
+"""
+#import pandas as pd
 
-import pandas as pd
+# Create an empty dataframe
+#df = pd.DataFrame(columns=['line'], dtype='string')
 
-df = pd.DataFrame(columns=['line'], dtype='string')
+# These two lines are used to test
+# txt_file_path = "./text_versions/HEERF Quarterly Budget and Expenditure Reporting - V1_3_1.txt"
+#txt_file_path = "./text_versions/HEERF_Quarterly_Budget_and_Expenditure_Public_Posting_FINAL_accessible.txt"
 
-#txt_file_path = "./text_versions/HEERF Quarterly Budget and Expenditure Reporting - V1_3_1.txt"
-txt_file_path = "./text_versions/HEERF_Quarterly_Budget_and_Expenditure_Public_Posting_FINAL_accessible.txt"
+# """ find the line where 'Institution Name:' exists """
+# fp = open(txt_file_path, 'r', encoding='UTF-8')
+# lines = fp.readlines()
+# for item in lines: 
+#     if ("Institution Name:" in item):
+#         idx = lines.index(item)
+
+# def extractLines(txtfile):    
+#     #lines_to_read = range(163,232)
+#     fp = open(txtfile, 'r', encoding='UTF-8')
+#     lines = fp.readlines()
+#     for item in lines:
+#         if ((not (u"\u00A0" in item)) & (":" in item) & (not("http" in item))):
+#             idx = lines.index(item)
+#             #df_idx = idx - 163
+#             df.loc[idx,'line']=item
+#             df.loc[idx,'line2']=item.strip()
+#     #df.reset_index()
+#     fp.close()
+
+# df2 = pd.DataFrame(columns=['line'], dtype='string')
+
+# def extractLines2(txtfile):    
+#     #lines_to_read = range(163,232)
+#     fp = open(txtfile, 'r', encoding='UTF-8')
+#     lines = fp.readlines()
+# #    idx_list = []
+#     for item in lines:
+#         if ("Institution Name:" in item):
+#             start_idx = lines.index(item)
+#     for item in lines:
+#         if (lines.index(item) >= start_idx):
+#             idx = lines.index(item)
+#             df2.loc[idx,'line']=item
+#             df2.loc[idx,'line2']=item.strip()
+#     fp.close()
+
+# extractLines(txt_file_path)
+# extractLines2(txt_file_path)
+
+# df.index = pd.RangeIndex(len(df.index))
+# df2.index=pd.RangeIndex(len(df2.index))
+
+# for item in df['line2']:
+#     idx = list(df['line2']).index(item)
+#     splitList = item.split(':')
+#     ans = splitList[-1].strip()
+#     #question = splitList[0].strip()+":"+splitList[1].strip
+#     question = item.replace(ans,'')
+#     df.loc[idx,'question'] = question
+#     df.loc[idx,'answer'] = ans
+
+# This line creates an empty dataframe with columns as the dictionary values
+# This is unsused code
+#df = pd.DataFrame(columns=list(d.values()),dtype='string')
 
 #%%
-
-""" find the line where 'Institution Name:' exists """
-fp = open(txt_file_path, 'r', encoding='UTF-8')
-lines = fp.readlines()
-for item in lines: 
-    if ("Institution Name:" in item):
-        idx = lines.index(item)
-
-#%%
-def extractLines(txtfile):    
-    #lines_to_read = range(163,232)
-    fp = open(txtfile, 'r', encoding='UTF-8')
-    lines = fp.readlines()
-    for item in lines:
-        if ((not (u"\u00A0" in item)) & (":" in item) & (not("http" in item))):
-            idx = lines.index(item)
-            #df_idx = idx - 163
-            df.loc[idx,'line']=item
-            df.loc[idx,'line2']=item.strip()
-    #df.reset_index()
-    fp.close()
-
-df2 = pd.DataFrame(columns=['line'], dtype='string')
-
-def extractLines2(txtfile):    
-    #lines_to_read = range(163,232)
-    fp = open(txtfile, 'r', encoding='UTF-8')
-    lines = fp.readlines()
-#    idx_list = []
-    for item in lines:
-        if ("Institution Name:" in item):
-            start_idx = lines.index(item)
-    for item in lines:
-        if (lines.index(item) >= start_idx):
-            idx = lines.index(item)
-            df2.loc[idx,'line']=item
-            df2.loc[idx,'line2']=item.strip()
-    fp.close()
-
-extractLines(txt_file_path)
-extractLines2(txt_file_path)
-
-df.index = pd.RangeIndex(len(df.index))
-df2.index=pd.RangeIndex(len(df2.index))
-
-#%%
-for item in df['line2']:
-    idx = list(df['line2']).index(item)
-    splitList = item.split(':')
-    ans = splitList[-1].strip()
-    #question = splitList[0].strip()+":"+splitList[1].strip
-    question = item.replace(ans,'')
-    df.loc[idx,'question'] = question
-    df.loc[idx,'answer'] = ans
-
-#%%
-""" -----------------------------------------------------------------"""
+""" Import the required packages 
+"""
 
 import os
 import glob
 import pandas as pd
 
 #%%
-""" setup dataframe """
+""" Set up of dictionary and directories
+"""
 
-# define dictionary where columns for dataframe correspond to necessary boxes in report
+# Define dictionary where columns for dataframe correspond to necessary boxes in report
 d = {
     'Institution Name':'INST',
     'Date of Report':'DATE',
@@ -223,87 +228,114 @@ d = {
     # 'Amount in a3 dollars if applicablePurchasing leasing or renting additional instructional equipment and supplies such as laboratory equipment or computers to reduce the number of students sharing equipment or supplies during a single class period and to provide time for disinfection between uses: 44
     }
 
+# Set the root directory or the folder you are currently working in
 root_dir = '.'
+
+# Set the path for where the text files are located
+# In this example, the text files we will convert to a dataframe are located in a folder called text_versions
+# that is nested within another folder called text_versions
+# that is, root directory > text_versions > text_versions >
 text_files_dir = os.path.join(root_dir, 'text_versions', 'text_versions')
 
-df = pd.DataFrame(columns=list(d.values()),dtype='string')
+#%%
+""" This function was for testing purposes and is not currently used to run the script. 
+"""
+# # To extract lines from the given text file,
+# def extractLines(txtfile):    
+#     #lines_to_read = range(163,232)
+#       # open the file as read only with encoding UTF8
+#     fp = open(txtfile, 'r', encoding='UTF-8')
+#       # extract the lines of the text file
+#     lines = fp.readlines()
+# #    idx_list = []
+#     for item in lines:
+#         if ("Institution Name:" in item):
+#             start_idx = lines.index(item)
+#     for item in lines:
+#         if (lines.index(item) >= start_idx):
+#             idx = lines.index(item)
+#             df2.loc[idx,'line']=item
+#             df2.loc[idx,'line2']=item.strip()
+#     fp.close()
 
 #%%
 
-def extractLines(txtfile):    
-    #lines_to_read = range(163,232)
-    fp = open(txtfile, 'r', encoding='UTF-8')
-    lines = fp.readlines()
-#    idx_list = []
-    for item in lines:
-        if ("Institution Name:" in item):
-            start_idx = lines.index(item)
-    for item in lines:
-        if (lines.index(item) >= start_idx):
-            idx = lines.index(item)
-            df2.loc[idx,'line']=item
-            df2.loc[idx,'line2']=item.strip()
-    fp.close()
-
-#%%
-#initialize empty list and dictionary
+# Initialize empty list and dictionary to track the text files
 row_list = []
 row_dict = {}
 
-#convert all entries in the dictionary lowercase
+# Convert all entries in the dictionary lowercase
 d_lower = {k.lower(): v for k, v in d.items()}
 
+# Run through each Institution folder in the text_files folder
 for folder in os.listdir(text_files_dir):
+    # If you want to print messages to check the progress of the forloop, uncomment the line below.
     #print("Working in folder {}".format(folder))
+    
+    # If the folder starts with a period (more common on MACs), skip the folder
     if folder.startswith('.'):
         print("Skipping folder {}".format(folder))
         continue
-
-    #loop through each file in the folder
+    
+    # With the institution folder,
+    # loop through each file in the folder
     for file in os.listdir(os.path.join(text_files_dir,folder)):
-        #reset dictionary
+        
+        #reset file dictionary
         row_dict = {}
-        filename = "{}".format(file)
+        
+        # convert "file" object to string
+        filename = str(file)
+        
+        # If you want to print messages to check the progress of the forloop, uncomment the line below.
         #print("Working with "+ filename)
+        
+        # Create a path to the text file 
         file_path = os.path.join(text_files_dir,folder,filename)
+        
+        # first try to open the text file
         try:
+            # open file in read only mode with UTF8 encoding
             fp = open(file_path, 'r', encoding='UTF-8')
+            
+        # if you can't open it and the error is FileNotFound, print the error message and skip the file
         except FileNotFoundError:
             print("Error: " + folder + "/" + filename)
             continue
+        
+        # Read the lines of the text file and put them into a list where each entry of the list is a line of the text file
         lines = fp.readlines()
         
-        #process each line
+        # Process each line (item) in the file
         for item in lines:
-            #only look at lines with a tab and a colon, and without http
+            # Only look at lines with a tab and a colon, and without http
             if ((not (u"\u00A0" in item)) & (":" in item) & (not("http" in item))):
-                # if item == '':
-                #     print("item is empty")
-                # else:
-                #     print("Working with item "+ item)
 
-                #split item on the colon
+                # Separate the line into pieces with the colon as breaks
                 splitList = item.split(':')
+                # Assign the last piece of the split as the "answer" or manual entry to the pdf
                 ans = splitList[-1].strip()
+                # Assign the string created by removing the "answer" from the initial line as the "question"
                 question = item.replace(ans,'')
+                # Remove any trailing colons at the end of the question and convert to all lowercase
                 question = question.replace(":", '').strip().lower()
-                #build a dictionary of relevant items
+                
+                # Build a dictionary of questions and answers found in the text file
+                # by using the keys defined by d and new values given by the text file
                 if question in d_lower.keys():
                     row_dict[d_lower[question]] = ans
-                # else:
-                #     print(question)
-                #     print()
         
-        #add dictionary to the list if it has any content
+        # If the method above was able to extract any question and answer pairs,
         if len(row_dict) > 0:
+            # Assign the file name to the filename column in the data frame
             row_dict['filename'] = filename
+            # Assign the institution name to the folder column in the data frame
             row_dict['folder'] = str(folder)
+            # Add the answers of the file (in the form of a dictionary)
+            # To the list called row_list
             row_list.append(row_dict)
-            # if len(row_dict) < 71:
-            #     print(folder, filename, len(row_dict))
+        # close the file before moving on to the next
         fp.close()
 
-#compile into one dataframe
+# Convert row_list into a dataframe where each entry of the list is a row in the data frame
 parsed_df = pd.DataFrame.from_dict(row_list)
-
-# %%
