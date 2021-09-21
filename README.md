@@ -2,6 +2,7 @@
 
 ## Anaconda Requirements
 
+```
 beautifulsoup4==4.9.3
 certifi==2021.5.30
 chardet==4.0.0
@@ -76,6 +77,7 @@ typing-extensions==3.10.0.0
 urllib3==1.26.6
 wget==3.2
 zipp==3.5.0
+```
 
 ## Required files:
 
