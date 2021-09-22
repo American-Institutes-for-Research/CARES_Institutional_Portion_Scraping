@@ -99,7 +99,7 @@ df['Site'] = [str(x).replace('www.', '') for x in df['shortURL']]
 df_filtered = df.loc[:,['Applicant Name','Applicant State', 'OPE ID', 'Site']]
 
 # Remove all special characters and punctuation from the names of the schools
-df_filtered['Applicant Name'] = df_filtered['Applicant Name'].apply(lambda x: re.sub('[^a-zA-Z0-9 \n\.]','',x))
+df_filtered['Applicant Name'] = df_filtered['Applicant Name'].apply(lambda x: re.sub('[^a-zA-Z0-9 \n\.]','',x.strip()))
 
                                                                      
 #%%
@@ -117,7 +117,7 @@ def google_search(query):
     # you may have better luck using either of the lines below:
     # Option 1: for j in search(query, tld="co.in", num=10, stop = None, pause = 45):
     # Option 2:
-    for j in search(query = query, num = 10, start = 0, pause = 45):
+    for j in search(query = query, num = 10, start = 0, pause = 50):
         results.append(j)
     
     return results
@@ -134,7 +134,7 @@ df_filtered_splits = [df_filtered[i:i+n].reset_index(drop = True) for i in range
 # In the example here, we are searching the entire column as the range goes from index 0 (first possible row)
 # to the last record (length of the column)
 for chunk_id in trange(6, 8):#len(df_filtered_splits)):
-    for applicant_no in tqdm(range(0, len(df_filtered_splits[chunk_id]['Applicant Name'])), desc="Google Search status"):
+    for applicant_no in tqdm(range(92, len(df_filtered_splits[chunk_id]['Applicant Name'])), desc="Google Search status"):
     
         # This query is what we would type into the search bar on Google.com
         # This query pulls pdf files from the school website
@@ -192,7 +192,7 @@ for chunk_id in trange(6, 8):#len(df_filtered_splits)):
                 
             # if no, download the PDF report and save in the file ./Downloaded_PDFs/Applicant Name
             try:
-                print("Downloading book {}".format(pdf_title))
+                print("Downloading PDF {}".format(pdf_title))
                 headers = {
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
                 }
