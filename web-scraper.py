@@ -123,22 +123,22 @@ def google_search(query):
     return results
 
 n = 500  #chunk row size
-df_filtered_splits = [df_filtered[i:i+n] for i in range(0,df_filtered.shape[0], n)]
+df_filtered_splits = [df_filtered[i:i+n].reset_index(drop = True) for i in range(0,df_filtered.shape[0], n)]
 
 #%%
 """ This section completes the "heavy lifting" of the algorithm.
-    Here, we are iterating through rows of the dataframe (df_filtered)
+    Here, we are iterating through rows of the dataframe (df_filtered_splits)
 """
 # This for loop iterates through applicants in the Applicant Name column 
 # with a row index contained in range(start,end)
 # In the example here, we are searching the entire column as the range goes from index 0 (first possible row)
 # to the last record (length of the column)
 for chunk_id in trange(6, 8):#len(df_filtered_splits)):
-    for applicant_no in tqdm(range(0, len(df_filtered['Applicant Name'])), desc="Google Search status"):
+    for applicant_no in tqdm(range(0, len(df_filtered_splits[chunk_id]['Applicant Name'])), desc="Google Search status"):
     
         # This query is what we would type into the search bar on Google.com
         # This query pulls pdf files from the school website
-        google_query = "\"Institutional Portion\" HEERF filetype:pdf site:" + df_filtered['Site'][applicant_no]
+        google_query = "\"Institutional Portion\" HEERF filetype:pdf site:" + df_filtered_splits[chunk_id]['Site'][applicant_no]
     
         # Perform the search by calling the function
         search_results = google_search(google_query)
@@ -149,10 +149,10 @@ for chunk_id in trange(6, 8):#len(df_filtered_splits)):
         # Iterate through each of the found PDFs in the search results
         for pdf_url in search_results:
             # Assign metadata about the PDF to the table
-            value_list = [{'OPE_ID': df_filtered['OPE ID'][applicant_no],
-                           'Applicant_Name': df_filtered['Applicant Name'][applicant_no],
-                           'Applicant_State': df_filtered['Applicant State'][applicant_no],
-                           'Applicant_Domain': df_filtered['Site'][applicant_no],
+            value_list = [{'OPE_ID': df_filtered_splits[chunk_id]['OPE ID'][applicant_no],
+                           'Applicant_Name': df_filtered_splits[chunk_id]['Applicant Name'][applicant_no],
+                           'Applicant_State': df_filtered_splits[chunk_id]['Applicant State'][applicant_no],
+                           'Applicant_Domain': df_filtered_splits[chunk_id]['Site'][applicant_no],
                            'Query': google_query,
                            'Num_Search_Results': num_search_results,
                            'PDF_URL': pdf_url}]
@@ -174,7 +174,7 @@ for chunk_id in trange(6, 8):#len(df_filtered_splits)):
                 continue
     
             # Make a folder in the Downloaded_PDFs folder with the Applicant Name (./Downloaded_PDFs/Applicant Name)
-            os.makedirs(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no]), exist_ok=True)
+            os.makedirs(os.path.join(".", "Downloaded_PDFs", df_filtered_splits[chunk_id]['Applicant Name'][applicant_no]), exist_ok=True)
             
             # Import information from Python to SQL under the specific PDF ID
             value_list[0]['ID'] = ID
@@ -186,7 +186,7 @@ for chunk_id in trange(6, 8):#len(df_filtered_splits)):
             pdf_title = re.sub('[^a-zA-Z0-9 \n\.]', '_', pdf_url.split('/')[-1])
             
             # Check if the title is already downloaded in the school folder
-            if pdf_title in os.listdir(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no])):
+            if pdf_title in os.listdir(os.path.join(".", "Downloaded_PDFs", df_filtered_splits[chunk_id]['Applicant Name'][applicant_no])):
                 # If yes, print message and move on to next file
                 print("PDF already downloaded, Skipping : {}".format(pdf_title))
                 
@@ -197,11 +197,11 @@ for chunk_id in trange(6, 8):#len(df_filtered_splits)):
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
                 }
                 r = requests.get(pdf_url, headers=headers)
-                with open(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no], pdf_title), 'wb') as f:
+                with open(os.path.join(".", "Downloaded_PDFs", df_filtered_splits[chunk_id]['Applicant Name'][applicant_no], pdf_title), 'wb') as f:
                     f.write(r.content)
             # unless an error occurs, then print the message below and move onto the next file
             except:
-                print("Error occured at school: {}, on pdf :{},  pdf_url :{}".format(df_filtered['Applicant Name'][applicant_no],
+                print("Error occured at school: {}, on pdf :{},  pdf_url :{}".format(df_filtered_splits[chunk_id]['Applicant Name'][applicant_no],
                                                                                                       pdf_title,
                                                                                                       pdf_url))
                 continue
