@@ -27,7 +27,7 @@ import os
 import requests
 import sqlalchemy as db
 from datetime import datetime
-from tqdm import tqdm
+from tqdm import tqdm, trange
 import pytz
 import time
 import json
@@ -59,7 +59,7 @@ We chose to use SQL to provide a table environment and to handle the potentially
 
 # Initialize the SQL engine
 # SQL Alchemy
-engine = db.create_engine('sqlite:///institutional_quarterly_report_metadata.sqlite')
+engine = db.create_engine('sqlite:///institutional_quarterly_report_metadata_6_to_8.sqlite')
 connection = engine.connect()
 metadata = db.MetaData()
 
@@ -113,17 +113,17 @@ def google_search(query):
     # Initialize the list that will contains the results as an empty list
     results = []
     
-    # The column labeled "Google Queried" marks a Y when the query above is used for the respective school
-    df['Google Queried'] = 'Y'
-    
     # Depending on the machine you are using or the version of packages you are using,
     # you may have better luck using either of the lines below:
-    # Option 1: for j in search(query, tld="co.in", num=10, stop = None, pause = 4):
+    # Option 1: for j in search(query, tld="co.in", num=10, stop = None, pause = 45):
     # Option 2:
-    for j in search(query = query, num = 10, start = 0, pause = 10):
+    for j in search(query = query, num = 10, start = 0, pause = 45):
         results.append(j)
     
     return results
+
+n = 500  #chunk row size
+df_filtered_splits = [df_filtered[i:i+n] for i in range(0,df_filtered.shape[0], n)]
 
 #%%
 """ This section completes the "heavy lifting" of the algorithm.
@@ -133,77 +133,78 @@ def google_search(query):
 # with a row index contained in range(start,end)
 # In the example here, we are searching the entire column as the range goes from index 0 (first possible row)
 # to the last record (length of the column)
-for applicant_no in tqdm(range(0, len(df_filtered['Applicant Name'])), desc="Google Search status"):
-
-    # This query is what we would type into the search bar on Google.com
-    # This query pulls pdf files from the school website
-    google_query = "\"Institutional Portion\" HEERF filetype:pdf site:" + df_filtered['Site'][applicant_no]
-
-    # Perform the search by calling the function
-    search_results = google_search(google_query)
-
-    # Count the number of results for each search
-    num_search_results = len(search_results)
-
-    # Iterate through each of the found PDFs in the search results
-    for pdf_url in search_results:
-        # Assign metadata about the PDF to the table
-        value_list = [{'OPE_ID': df_filtered['OPE ID'][applicant_no],
-                       'Applicant_Name': df_filtered['Applicant Name'][applicant_no],
-                       'Applicant_State': df_filtered['Applicant State'][applicant_no],
-                       'Applicant_Domain': df_filtered['Site'][applicant_no],
-                       'Query': google_query,
-                       'Num_Search_Results': num_search_results,
-                       'PDF_URL': pdf_url}]
-        
-        # Create a unique ID for each PDF found
-        ID = sha256(json.dumps(value_list[0], default=str, sort_keys=True).encode()).hexdigest()
+for chunk_id in trange(6, 8):#len(df_filtered_splits)):
+    for applicant_no in tqdm(range(0, len(df_filtered['Applicant Name'])), desc="Google Search status"):
     
-        # with the unique ID made for each PDF, check and see if the ID already shows up in the table 
-        #query = db.select([google_search_table]).filter(google_search_table.columns.ID == ID)
-        query = connection.execute(db.select(google_search_table.columns.ID).filter(google_search_table.columns.ID == ID))
-        result = len(query.scalars().all())
+        # This query is what we would type into the search bar on Google.com
+        # This query pulls pdf files from the school website
+        google_query = "\"Institutional Portion\" HEERF filetype:pdf site:" + df_filtered['Site'][applicant_no]
     
-        # if the ID is already in the table, then we know the PDF has already been entered into the SQL database
-        # result should either be zero (if the PDF needs to be added to the database)
-        # or result could be one (if the PDF has already been added)
-        if result == 1:
-            print("Already in database")
-            # continue to next PDF in search results
-            continue
-
-        # Make a folder in the Downloaded_PDFs folder with the Applicant Name (./Downloaded_PDFs/Applicant Name)
-        os.makedirs(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no]), exist_ok=True)
-        
-        # Import information from Python to SQL under the specific PDF ID
-        value_list[0]['ID'] = ID
-        query = db.insert(google_search_table)
-        ResultProxy = connection.execute(query, value_list)
-        
-        # Select the PDF title from the URL string and
-        # Remove special characters and punctionation from the PDF title
-        pdf_title = re.sub('[^a-zA-Z0-9 \n\.]', '_', pdf_url.split('/')[-1])
-        
-        # Check if the title is already downloaded in the school folder
-        if pdf_title in os.listdir(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no])):
-            # If yes, print message and move on to next file
-            print("PDF already downloaded, Skipping : {}".format(pdf_title))
+        # Perform the search by calling the function
+        search_results = google_search(google_query)
+    
+        # Count the number of results for each search
+        num_search_results = len(search_results)
+    
+        # Iterate through each of the found PDFs in the search results
+        for pdf_url in search_results:
+            # Assign metadata about the PDF to the table
+            value_list = [{'OPE_ID': df_filtered['OPE ID'][applicant_no],
+                           'Applicant_Name': df_filtered['Applicant Name'][applicant_no],
+                           'Applicant_State': df_filtered['Applicant State'][applicant_no],
+                           'Applicant_Domain': df_filtered['Site'][applicant_no],
+                           'Query': google_query,
+                           'Num_Search_Results': num_search_results,
+                           'PDF_URL': pdf_url}]
             
-        # if no, download the PDF report and save in the file ./Downloaded_PDFs/Applicant Name
-        try:
-            print("Downloading book {}".format(pdf_title))
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
-            }
-            r = requests.get(pdf_url, headers=headers)
-            with open(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no], pdf_title), 'wb') as f:
-                f.write(r.content)
-        # unless an error occurs, then print the message below and move onto the next file
-        except:
-            print("Error occured at school: {}, on pdf :{},  pdf_url :{}".format(df_filtered['Applicant Name'][applicant_no],
-                                                                                                  pdf_title,
-                                                                                                  pdf_url))
-            continue
+            # Create a unique ID for each PDF found
+            ID = sha256(json.dumps(value_list[0], default=str, sort_keys=True).encode()).hexdigest()
+        
+            # with the unique ID made for each PDF, check and see if the ID already shows up in the table
+            #query = db.select([google_search_table]).filter(google_search_table.columns.ID == ID)
+            query = connection.execute(db.select(google_search_table.columns.ID).filter(google_search_table.columns.ID == ID))
+            result = len(query.scalars().all())
+        
+            # if the ID is already in the table, then we know the PDF has already been entered into the SQL database
+            # result should either be zero (if the PDF needs to be added to the database)
+            # or result could be one (if the PDF has already been added)
+            if result == 1:
+                print("Already in database")
+                # continue to next PDF in search results
+                continue
+    
+            # Make a folder in the Downloaded_PDFs folder with the Applicant Name (./Downloaded_PDFs/Applicant Name)
+            os.makedirs(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no]), exist_ok=True)
+            
+            # Import information from Python to SQL under the specific PDF ID
+            value_list[0]['ID'] = ID
+            query = db.insert(google_search_table)
+            ResultProxy = connection.execute(query, value_list)
+            
+            # Select the PDF title from the URL string and
+            # Remove special characters and punctionation from the PDF title
+            pdf_title = re.sub('[^a-zA-Z0-9 \n\.]', '_', pdf_url.split('/')[-1])
+            
+            # Check if the title is already downloaded in the school folder
+            if pdf_title in os.listdir(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no])):
+                # If yes, print message and move on to next file
+                print("PDF already downloaded, Skipping : {}".format(pdf_title))
+                
+            # if no, download the PDF report and save in the file ./Downloaded_PDFs/Applicant Name
+            try:
+                print("Downloading book {}".format(pdf_title))
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'
+                }
+                r = requests.get(pdf_url, headers=headers)
+                with open(os.path.join(".", "Downloaded_PDFs", df_filtered['Applicant Name'][applicant_no], pdf_title), 'wb') as f:
+                    f.write(r.content)
+            # unless an error occurs, then print the message below and move onto the next file
+            except:
+                print("Error occured at school: {}, on pdf :{},  pdf_url :{}".format(df_filtered['Applicant Name'][applicant_no],
+                                                                                                      pdf_title,
+                                                                                                      pdf_url))
+                continue
     
 # If you would like to convert the completed SQL database back into a dataframe, 
 # You may run the code below and view temp in the Variable Explorer.
