@@ -1,7 +1,7 @@
 """
    +===================+========-========*========-========+===================+
-   ||                               pdf_2_txt.py$                             ||
-   ||                      by Karthik Jallawaram on (12/6/2020)               ||
+   ||                               pdf_2_txt.py                             ||
+   ||                      by Karthik Jallawaram on (1/9/2021)               ||
    ||                       American Institutes for Research                  ||
    ||                          CARES_Web_Scraping                             ||
    ||                                                                         ||
@@ -24,6 +24,7 @@
 from tika import parser
 import os
 import re
+from tqdm import tqdm
 from urllib.request import url2pathname
 
 # Set the root directory (the file that you are currently working out of)
@@ -36,7 +37,7 @@ target_dir = os.path.join(root_dir, 'text_versions')
 #%%
 
 # Iterate through each Institution Folder in the Dowloaded_PDfs folder
-for folder in os.listdir(downloaded_files_dir):
+for folder in tqdm(os.listdir(downloaded_files_dir), desc = "Batch Converting PDF to TXT files"):
     
     # Skip over folders that start with a period.
     # These are more common on MACs. Unlikely to see folders like this with Windows
@@ -68,6 +69,6 @@ for folder in os.listdir(downloaded_files_dir):
     
             # Save converted files to the folder of the institution
             with open(os.path.join(target_dir, re.sub('[^a-zA-Z0-9 \n\.]', '_', folder), "{}.txt".format(re.sub('[^a-zA-Z0-9 \n\.]', '_', file.split('.')[0]))), "w") as text_file:
-                ext_file.write(cleaned_text)
+                text_file.write(cleaned_text)
 
             
