@@ -98,6 +98,7 @@
 import os
 import glob
 import pandas as pd
+from tqdm import tqdm
 
 #%%
 """ Set up of dictionary and directories
@@ -233,9 +234,8 @@ root_dir = '.'
 
 # Set the path for where the text files are located
 # In this example, the text files we will convert to a dataframe are located in a folder called text_versions
-# that is nested within another folder called text_versions
-# that is, root directory > text_versions > text_versions >
-text_files_dir = os.path.join(root_dir, 'text_versions', 'text_versions')
+# that is, root directory > text_versions
+text_files_dir = os.path.join(root_dir, 'text_versions')
 
 #%%
 """ This function was for testing purposes and is not currently used to run the script. 
@@ -268,7 +268,7 @@ row_dict = {}
 d_lower = {k.lower(): v for k, v in d.items()}
 
 # Run through each Institution folder in the text_files folder
-for folder in os.listdir(text_files_dir):
+for folder in tqdm(os.listdir(text_files_dir), desc = "Extracting data from TXT files"):
     # If you want to print messages to check the progress of the forloop, uncomment the line below.
     #print("Working in folder {}".format(folder))
     
@@ -339,3 +339,4 @@ for folder in os.listdir(text_files_dir):
 
 # Convert row_list into a dataframe where each entry of the list is a row in the data frame
 parsed_df = pd.DataFrame.from_dict(row_list)
+parsed_df.to_excel("Extracted Data.xlsx")
